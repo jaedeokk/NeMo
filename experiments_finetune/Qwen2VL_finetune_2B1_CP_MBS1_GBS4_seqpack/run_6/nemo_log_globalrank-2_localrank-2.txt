@@ -1,0 +1,33 @@
+[NeMo W 2025-09-05 06:56:21 nemo_logging:405] /usr/local/lib/python3.12/dist-packages/pydub/utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
+      warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
+    
+[NeMo W 2025-09-05 06:56:24 nemo_logging:405] No version folders would be created under the log folder as 'resume_if_exists' is enabled.
+[NeMo I 2025-09-05 06:56:24 nemo_logging:393] Experiments will be logged at experiments_finetune/Qwen2VL_finetune_2B1_CP_MBS1_GBS4_seqpack
+[NeMo W 2025-09-05 06:56:24 nemo_logging:405] "update_logger_directory" is True. Overwriting tensorboard logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 06:56:24 nemo_logging:405] "update_logger_directory" is True. Overwriting wandb logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 06:56:24 nemo_logging:405] There were no checkpoints found in checkpoint_dir or no checkpoint folder at checkpoint_dir :experiments_finetune. Training from scratch.
+[NeMo I 2025-09-05 06:56:24 nemo_logging:393] Fixing mis-match between ddp-config & mcore-optimizer config
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has data parallel group : [0, 1, 2, 3]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has combined group of data parallel and context parallel : [0, 1, 2, 3]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All data parallel group ranks with context parallel combined: [[0, 1, 2, 3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Ranks 2 has data parallel rank: 2
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has context parallel group: [2]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All context parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Ranks 2 has context parallel rank: 0
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has model parallel group: [2]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has tensor model parallel group: [2]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All tensor model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has tensor model parallel rank: 0
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has pipeline model parallel group: [2]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has embedding group: [2]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All pipeline model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has pipeline model parallel rank 0
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] All embedding group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 06:56:25 nemo_logging:393] Rank 2 has embedding rank: 0
+[NeMo I 2025-09-05 06:56:30 nemo_logging:393] Use preset vocab_size: 151936, original vocab_size: 151657, dummy tokens: 279.
+[NeMo I 2025-09-05 06:56:31 nemo_logging:393] Restored language model weights from None
+[NeMo I 2025-09-05 06:56:31 nemo_logging:393] Restored vision model weights from None
+[NeMo I 2025-09-05 06:56:31 nemo_logging:393] Copying Trainer's 'max_steps' (5190) to LR scheduler's 'max_steps'.
+[NeMo I 2025-09-05 06:56:31 nemo_logging:393] Multimodal train dataloader initializing with init_global_step 0
+[NeMo I 2025-09-05 06:56:31 nemo_logging:393]  Multimodal  train dataloader initializing withrank 2 world_size 4 data_parallel_group <torch.distributed.distributed_c10d.ProcessGroup object at 0x7f99a89fc230> ****** 

@@ -1,0 +1,188 @@
+[NeMo W 2025-09-05 04:57:02 nemo_logging:405] /usr/local/lib/python3.12/dist-packages/pydub/utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
+      warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
+    
+[NeMo W 2025-09-05 04:57:05 nemo_logging:405] No version folders would be created under the log folder as 'resume_if_exists' is enabled.
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Experiments will be logged at experiments_finetune/Qwen2VL_finetune_2B1_CP_MBS1_GBS4_seqpack
+[NeMo W 2025-09-05 04:57:05 nemo_logging:405] "update_logger_directory" is True. Overwriting tensorboard logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 04:57:05 nemo_logging:405] "update_logger_directory" is True. Overwriting wandb logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 04:57:05 nemo_logging:405] There were no checkpoints found in checkpoint_dir or no checkpoint folder at checkpoint_dir :experiments_finetune. Training from scratch.
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Fixing mis-match between ddp-config & mcore-optimizer config
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has data parallel group : [0, 1, 2, 3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has combined group of data parallel and context parallel : [0, 1, 2, 3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All data parallel group ranks with context parallel combined: [[0, 1, 2, 3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Ranks 3 has data parallel rank: 3
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has context parallel group: [3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All context parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Ranks 3 has context parallel rank: 0
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has model parallel group: [3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has tensor model parallel group: [3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All tensor model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has tensor model parallel rank: 0
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has pipeline model parallel group: [3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has embedding group: [3]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All pipeline model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has pipeline model parallel rank 0
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] All embedding group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 04:57:05 nemo_logging:393] Rank 3 has embedding rank: 0
+[NeMo I 2025-09-05 04:57:10 nemo_logging:393] Use preset vocab_size: 151936, original vocab_size: 151657, dummy tokens: 279.
+[NeMo I 2025-09-05 04:57:11 nemo_logging:393] Restored language model weights from None
+[NeMo I 2025-09-05 04:57:11 nemo_logging:393] Restored vision model weights from None
+[NeMo I 2025-09-05 04:57:11 nemo_logging:393] Copying Trainer's 'max_steps' (5190) to LR scheduler's 'max_steps'.
+[NeMo I 2025-09-05 04:57:11 nemo_logging:393] Multimodal train dataloader initializing with init_global_step 0
+[NeMo I 2025-09-05 04:57:11 nemo_logging:393]  Multimodal  train dataloader initializing withrank 3 world_size 4 data_parallel_group <torch.distributed.distributed_c10d.ProcessGroup object at 0x7f99b4187a70> ****** 
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 14
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 15
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 16
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 17
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 18
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 19
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 14
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 15
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 16
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 17
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 18
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 19
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 20
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 21
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 22
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 23
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 24
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 25
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 04:57:13 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 04:57:21 rerun_state_machine:1263] Implicit initialization of Rerun State Machine!
+[NeMo W 2025-09-05 05:02:15 nemo_logging:405] /usr/local/lib/python3.12/dist-packages/pydub/utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
+      warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
+    
+[NeMo W 2025-09-05 05:02:18 nemo_logging:405] No version folders would be created under the log folder as 'resume_if_exists' is enabled.
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Experiments will be logged at experiments_finetune/Qwen2VL_finetune_2B1_CP_MBS1_GBS4_seqpack
+[NeMo W 2025-09-05 05:02:18 nemo_logging:405] "update_logger_directory" is True. Overwriting tensorboard logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 05:02:18 nemo_logging:405] "update_logger_directory" is True. Overwriting wandb logger "save_dir" to experiments_finetune
+[NeMo W 2025-09-05 05:02:18 nemo_logging:405] There were no checkpoints found in checkpoint_dir or no checkpoint folder at checkpoint_dir :experiments_finetune. Training from scratch.
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Fixing mis-match between ddp-config & mcore-optimizer config
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has data parallel group : [0, 1, 2, 3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has combined group of data parallel and context parallel : [0, 1, 2, 3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All data parallel group ranks with context parallel combined: [[0, 1, 2, 3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Ranks 3 has data parallel rank: 3
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has context parallel group: [3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All context parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Ranks 3 has context parallel rank: 0
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has model parallel group: [3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has tensor model parallel group: [3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All tensor model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has tensor model parallel rank: 0
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has pipeline model parallel group: [3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has embedding group: [3]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All pipeline model parallel group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has pipeline model parallel rank 0
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] All embedding group ranks: [[0], [1], [2], [3]]
+[NeMo I 2025-09-05 05:02:18 nemo_logging:393] Rank 3 has embedding rank: 0
+[NeMo I 2025-09-05 05:02:23 nemo_logging:393] Use preset vocab_size: 151936, original vocab_size: 151657, dummy tokens: 279.
+[NeMo I 2025-09-05 05:02:24 nemo_logging:393] Restored language model weights from None
+[NeMo I 2025-09-05 05:02:24 nemo_logging:393] Restored vision model weights from None
+[NeMo I 2025-09-05 05:02:24 nemo_logging:393] Copying Trainer's 'max_steps' (5190) to LR scheduler's 'max_steps'.
+[NeMo I 2025-09-05 05:02:24 nemo_logging:393] Multimodal train dataloader initializing with init_global_step 0
+[NeMo I 2025-09-05 05:02:24 nemo_logging:393]  Multimodal  train dataloader initializing withrank 3 world_size 4 data_parallel_group <torch.distributed.distributed_c10d.ProcessGroup object at 0x7f982cd84030> ****** 
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 14
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 15
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 16
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 17
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 18
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 19
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 14
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 15
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 16
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 17
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 18
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 19
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 20
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 21
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 22
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 23
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 24
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 25
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 0
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 1
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 2
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 3
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 4
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 5
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 6
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 7
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 8
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 9
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 10
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 11
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'user' in turn 12
+[NeMo W 2025-09-05 05:02:26 nemo_logging:405] Expect conversation organized in order: [sys] human gpt human gpt...,but got role 'assistant' in turn 13
+[NeMo W 2025-09-05 05:02:30 rerun_state_machine:1263] Implicit initialization of Rerun State Machine!
