@@ -17,6 +17,9 @@ TP_SIZE=1
 MBS=1
 GBS=4
 
+#Pixel Nums
+MINPIXELS=784
+MAXPIXELS=43904
 # Exp logging path
 EXPERIMENT_NAME="Qwen2VL_finetune_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack"
 WANDB_PROJECT="Qwen2VL"
@@ -35,6 +38,8 @@ ARGS="--data_type $DATA_TYPE \
       --wandb_project $WANDB_PROJECT \
       --log_dir $LOG_DIR\
       --max_sequence_length 4096\
+      --min_pixels $MINPIXELS\
+      --max_pixels $MAXPIXELS\
       --restore_path $LANGUAGE_MODEL_PATH "
       
 

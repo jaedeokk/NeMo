@@ -175,12 +175,6 @@ def rgb_to_spec_tokenize(img, mode=2):
     mode: 0=4:4:4, 1=4:2:2 (W/2), 2=4:2:0 (H/2,W/2)
     """
     h, w = img.shape[-2], img.shape[-1]
-
-    # pad to multiple of 8 (torch/np 둘 다 지원하는 버전)
-    # if (h % 8 != 0) or (w % 8 != 0):
-    #     img = pad_to_multiple_of(img, 8)
-    #     h, w = img.shape[-2], img.shape[-1]
-
     y, cb, cr = split_rgb_to_ycbcr(img)  # 타입 유지 가정
 
     # --- chroma subsampling ---

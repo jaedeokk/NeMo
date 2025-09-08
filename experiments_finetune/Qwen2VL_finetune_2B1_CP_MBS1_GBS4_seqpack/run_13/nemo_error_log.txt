@@ -1,9 +1,0 @@
-[NeMo W 2025-09-05 07:25:13 nemo_logging:405] /usr/local/lib/python3.12/dist-packages/pydub/utils.py:170: RuntimeWarning: Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work
-      warn("Couldn't find ffmpeg or avconv - defaulting to ffmpeg, but may not work", RuntimeWarning)
-    
-[NeMo W 2025-09-05 07:25:16 nemo_logging:405] No version folders would be created under the log folder as 'resume_if_exists' is enabled.
-[NeMo W 2025-09-05 07:25:16 nemo_logging:405] "update_logger_directory" is True. Overwriting tensorboard logger "save_dir" to experiments_finetune
-[NeMo W 2025-09-05 07:25:16 nemo_logging:405] "update_logger_directory" is True. Overwriting wandb logger "save_dir" to experiments_finetune
-[NeMo W 2025-09-05 07:25:16 nemo_logging:405] There were no checkpoints found in checkpoint_dir or no checkpoint folder at checkpoint_dir :experiments_finetune. Training from scratch.
-[NeMo W 2025-09-05 07:25:23 nemo_logging:405] /opt/venv/lib/python3.12/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:425: The 'train_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=15` in the `DataLoader` to improve performance.
-    
