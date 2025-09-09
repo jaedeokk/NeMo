@@ -21,17 +21,9 @@ pip install "transformers==4.51.3"
 
 ### 2. Model Preparation
 
-Download the Qwen2-VL-2B-Instruct model:
-
+The `prepare_nemo_checkpoint.py` script downloads the pretrained model from HuggingFace and converts it to the NeMo2 format.
 ```bash
-# Install Git LFS for large file handling
-sudo apt update && sudo apt install git-lfs
-
-# Move to models directory and clone the model
-cd /models/
-git lfs install
-git clone https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct
-cd -
+python prepare_nemo_checkpoint.py -o /models/Qwen2-VL-2B-Instruct-nemo
 ```
 
 ### 3. Dataset Preparation
