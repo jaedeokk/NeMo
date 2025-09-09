@@ -19,6 +19,10 @@ Inside the Docker container, install the required Transformers version:
 pip install "transformers==4.51.3"
 ```
 
+```bash
+cd experiments/dct_tokenizer
+```
+
 ### 2. Model Preparation
 
 The `prepare_nemo_checkpoint.py` script downloads the pretrained model from HuggingFace and converts it to the NeMo2 format.
@@ -60,9 +64,6 @@ The raw dataset needs to be converted to WebDataset format for efficient trainin
 - Generates metadata for efficient data loading
 
 ```bash
-# Move to the experiment directory.
-cd experiments/dct_tokenizer
-
 # Convert dataset to WebDataset format
 python data_preparation.py --data-dir /datasets/Cambrian737k/Cambrian737k --output-dir /datasets/Cambrian737k-wds
 ### Expected log messges below.
