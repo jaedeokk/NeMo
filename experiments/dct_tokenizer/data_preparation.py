@@ -1,10 +1,11 @@
 """
 This script is used to prepare the Cambrian737k dataset in the webdataset format.
 
+Adopted from scripts/vlm/convert_to_qwen2vl_wds.py
+
 """
 
 import argparse
-import io
 import json
 import os
 import pickle
@@ -13,15 +14,16 @@ from functools import partial
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
+import numpy as np
 import webdataset as wds
-from PIL import Image
 from tqdm import tqdm
+from webdataset.writer import add_handlers, default_handlers
 
 os.environ["FORCE_QWENVL_VIDEO_READER"] = 'torchvision'
 from qwen_vl_utils import fetch_image, fetch_video
 
 
-def process_single_image(indexed_entry, dataset_dir):
+def process_single_sample(indexed_entry, dataset_dir):
     """
     Process a single image entry and return the sample data.
 
@@ -32,20 +34,38 @@ def process_single_image(indexed_entry, dataset_dir):
     Returns:
         Dictionary with processed sample data or None if image doesn't exist
     """
+
     idx, entry = indexed_entry
-    img_path = dataset_dir / entry["image"]
-    assert img_path.exists(), f"Image {img_path} does not exist."
 
-    # TODO(wookyong):
-    #   Extend the processing logic to support multiple images and videos.
-    #   Refer to scripts/vlm/convert_to_qwen2vl_wds.py
+    # NOTE: read a dataset in sharegpt format
+    images_data = []
+    if 'image' in entry:
+        pop_item = entry.pop('image')
+    elif 'images' in entry:
+        pop_item = entry.pop('images')
+    else:
+        pop_item = []
 
-    # Image to JPEG bytes
-    with Image.open(img_path) as image:
-        with io.BytesIO() as buf:
-            image.convert("RGB").save(buf, format="JPEG")
-            # getvalue() returns a copy of the buffer content
-            image_data = buf.getvalue()
+    if not isinstance(pop_item, list):
+        pop_item = [pop_item]
+    for image in pop_item:
+        file_path = (dataset_dir / image).resolve()
+        images_data.append(fetch_image({"image": str(file_path)}))
+
+    videos_data = []
+    if 'video' in entry:
+        pop_item = entry.pop('video')
+    elif 'videos' in entry:
+        pop_item = entry.pop('videos')
+    else:
+        pop_item = []
+
+    if not isinstance(pop_item, list):
+        pop_item = [pop_item]
+    for video in pop_item:
+        file_path = (dataset_dir / video).resolve()
+        fvideo = fetch_video({"video": str(file_path)})
+        videos_data.append(fvideo)
 
     if 'conversations' in entry:
         conv = json.dumps(entry['conversations']).encode("utf-8")
@@ -55,11 +75,14 @@ def process_single_image(indexed_entry, dataset_dir):
         conv = None
     assert conv is not None, "No conversation texts"
 
-    return {
+    sample = {
         "__key__": entry.pop('id', str(idx)),
-        "jpg": image_data,
+        "jpgs": images_data,
+        'videos': videos_data,
         "json": conv,
     }
+    return sample
+
 
 def filter_cambrian737k_dataset(
     dataset_dir: Path,
@@ -129,11 +152,14 @@ def convert_cambrian737k_dataset_to_webdataset(
         data_dir: Path to the data directory
         metadata_json_path: Path to the metadata JSON file
         output_dir: Path to the output directory
-        num_workers: Number of worker processes (default: CPU count // 2)
+        num_workers: Number of worker processes (default: min(32, CPU count // 2))
     """
     if num_workers is None:
         # Use half of CPU cores for I/O bound tasks like image processing
-        num_workers = max(1, cpu_count() // 2)
+        num_workers = min(32, cpu_count() // 2)
+    if num_workers > 64:
+        print("Setting to 64 to avoid buffer overflow issue.")
+        num_workers = 64
 
     # Load data
     with metadata_json_path.open('r') as f:
@@ -142,9 +168,16 @@ def convert_cambrian737k_dataset_to_webdataset(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Create a partial function with dataset_dir fixed
-    process_func = partial(process_single_image, dataset_dir=data_dir)
+    process_func = partial(process_single_sample, dataset_dir=data_dir)
 
     print(f"Processing {len(data)} images using {num_workers} workers...")
+
+    # custom webdataset ShardWriter Encoder
+    add_handlers(
+        default_handlers, "jpgs", lambda data: pickle.dumps([np.array(d) for d in data]))
+    add_handlers(
+        default_handlers, "videos", lambda data: pickle.dumps([[np.array(d) for d in video] for video in data]))
+
 
     with wds.ShardWriter(
         str(output_dir / 'Cambrian737k-%05d.tar'), maxcount=10000
@@ -152,13 +185,10 @@ def convert_cambrian737k_dataset_to_webdataset(
         # Use multiprocessing to process images in parallel
         with Pool(processes=num_workers) as pool:
             # Process images in chunks to avoid memory issues
-            chunk_size = max(1, len(data) // (num_workers * 4))
-
-            # Create indexed data for processing
-            indexed_data = [(idx, entry) for idx, entry in enumerate(data)]
+            chunk_size = max(1, len(data) // num_workers)
 
             # Use imap for better memory efficiency and progress tracking
-            results = pool.imap(process_func, indexed_data, chunksize=chunk_size)
+            results = pool.imap(process_func, enumerate(data), chunksize=chunk_size)
 
             # Write results to shard writer with progress bar
             for sample in tqdm(results, total=len(data), desc="Processing images"):
@@ -173,7 +203,7 @@ if __name__ == "__main__":
         description="Prepare the Cambrian737k dataset in the webdataset format.")
     parser.add_argument(
         "--data-dir", type=Path,
-        default='/datasets/Cambrian737k',
+        default='/datasets/Cambrian737k/Cambrian737k',
         help="Path to dataset directory.")
     parser.add_argument(
         "--output-dir", type=Path,
