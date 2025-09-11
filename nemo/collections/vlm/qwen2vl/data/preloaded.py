@@ -402,9 +402,7 @@ class PreloadedSupervisedDataset(Dataset):
             return paths
 
         # Get image and video paths
-        # images = source.get('images', [])
-        images = source.get('image', [])
-
+        images = source.get('images', [])
         videos = source.get('videos', [])
 
         # Process image and video paths
