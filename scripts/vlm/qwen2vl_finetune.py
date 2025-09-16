@@ -287,8 +287,8 @@ if __name__ == "__main__":
     parser.add_argument("--wandb_project", type=str, required=False, default=None)
     parser.add_argument("--gbs", type=int, required=False, default=64, help="Global batch size")
     parser.add_argument("--mbs", type=int, required=False, default=2, help="Micro batch size")
-    parser.add_argument('--min_pixels',type=int,default=784,help="Minimum pixel numbers")
-    parser.add_argument('--max_pixels',type=int,default=50176,help="Maximum pixel numbers")
+    parser.add_argument('--min_pixels',type=int,default=None,help="Minimum pixel numbers")
+    parser.add_argument('--max_pixels',type=int,default=None,help="Maximum pixel numbers")
     parser.add_argument("--lr", type=float, required=False, default=2.0e-06, help="Learning rate")
     parser.add_argument('--enable_sp', action='store_true', help="enable sequence parallel")
     parser.add_argument(
