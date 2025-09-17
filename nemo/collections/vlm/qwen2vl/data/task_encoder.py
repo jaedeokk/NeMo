@@ -133,7 +133,10 @@ def cook_chatml_sample(sample: dict) -> ChatMLSample:
     if imgs:
         imgs = pickle.loads(imgs)
         if isinstance(imgs, list) and len(imgs) > 0:
-            imgs = [Image.open(io.BytesIO(d)).convert("RGB") for d in imgs]
+            try:
+                imgs = [Image.open(io.BytesIO(d)).convert("RGB") for d in imgs]
+            except:
+                imgs = [Image.fromarray(d) for d in imgs]
         else:
             imgs = None
     videos = sample.get('videos', None)
