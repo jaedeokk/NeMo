@@ -19,6 +19,14 @@ Inside the Docker container, install the required Transformers version:
 pip install "transformers==4.51.3"
 ```
 
+
+For processing discrete cosine transform (dct), install the torch-dct:
+```bash
+# Tensor dct module
+pip install torch-dct
+```
+
+
 ```bash
 cd experiments/dct_tokenizer
 ```

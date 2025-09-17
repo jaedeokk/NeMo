@@ -159,6 +159,7 @@ def rgb_to_spec_tokenize(img,patch_size=4 ,mode=2):
          shape ...xH x W  (마지막 두 축이 H,W)
     mode: 0=4:4:4, 1=4:2:2 (W/2), 2=4:2:0 (H/2,W/2)
     """
+    #TODO: Mode 0,1 support (WK Han)
     h, w = img.shape[-2], img.shape[-1]
     y, cb, cr = split_rgb_to_ycbcr(img)  # 타입 유지 가정
 

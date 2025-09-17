@@ -55,6 +55,7 @@ class Qwen2VisionModel(VisionModule):
         spatial_patch_size: int = 14,
         img_h: int = 336,
         img_w: int = 336,
+        in_channels: int=3
     ) -> None:
 
         super().__init__(config=transformer_config)
@@ -71,7 +72,7 @@ class Qwen2VisionModel(VisionModule):
         self.merge_hidden_size = self.visual_hidden_size * (spatial_merge_size**2)
         self.img_h = img_h
         self.img_w = img_w
-        self.in_channels = 3
+        self.in_channels = in_channels
 
         assert self.img_h % self.patch_dim == 0
         assert self.img_w % self.patch_dim == 0
