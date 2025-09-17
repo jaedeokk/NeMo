@@ -108,7 +108,7 @@ def set_input_tensor(self, tensor):
 @dataclass
 class Qwen2VLVisionConfig(TransformerConfig, io.IOMixin):
     """Qwen2VL Vision Model Config"""
-
+    in_channels: int =3
     add_class_token: bool = False
     class_token_len: int = 1
     patch_dim: int = 14
@@ -157,6 +157,7 @@ class Qwen2VLVisionConfig(TransformerConfig, io.IOMixin):
             spatial_patch_size=self.spatial_patch_size,
             img_h=self.img_h,
             img_w=self.img_w,
+            in_channels=self.in_channels
         )
 
         return model

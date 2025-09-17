@@ -26,28 +26,21 @@ from transformers.utils import logging
 logger = logging.get_logger(__name__)
 
 
-def patchfication(x):
-    return rearrange(x, 'b c (h ph) (w pw) -> b c ph pw h w', ph=2, pw=2)
+def patchfication(x:torch.Tensor ,patch_size:int = 4):
+    if len(x.shape)==4:
+        return rearrange(x, 'b c (h ph) (w pw) -> b c h w ph pw', ph=patch_size, pw=patch_size)
+    elif len(x.shape)==3:
+        return rearrange(x, 'c (h ph) (w pw) -> c h w ph pw', ph=patch_size, pw=patch_size)
 
 
-def patchfication_nonbatch(x):
-    return rearrange(x, 'c (h ph) (w pw) -> c ph pw h w', ph=2, pw=2)
 
 
-def rea(x):
-    return rearrange(x, 'c h w ph pw -> c (h ph) (w pw)')
+def patch_merge(x:torch.Tensor):
+    if len(x.shape)==5:
+        return rearrange(x, 'c h w ph pw -> c (h ph) (w pw)')
+    elif len(x.shape)==6:
+        return rearrange(x, 'b c h w ph pw -> b c (h ph) (w pw)')
 
-
-def b_rea(x):
-    return rearrange(x, 'b c h w ph pw -> b c (h ph) (w pw)')
-
-
-def rea_f(x):
-    return rearrange(x, 'c (h ph) (w pw) -> c h w ph pw', ph=4, pw=4)
-
-
-def b_rea_f(x):
-    return rearrange(x, 'b c (h ph) (w pw) -> b c h w ph pw', ph=4, pw=4)
 
 
 @torch.cuda.nvtx.range('process_channel')
@@ -58,20 +51,23 @@ def process_channel(channel, qmap):
     if len(channel.shape) == 5:
         channel = channel[:, :, :, :, :] * qmap[None, None, None, :, :]  #
         channel = dct.idct_2d(channel, norm='ortho')
-        channel = rea(channel)
+        channel = patch_merge(channel)
     elif len(channel.shape) == 6:
         channel = channel[:, :, :, :, :, :] * qmap[:, None, None, None, :, :]
         channel = dct.idct_2d(channel, norm='ortho')
-        channel = b_rea(channel)
+        channel = patch_merge(channel)
     return channel
 
 
 @torch.cuda.nvtx.range('split_rgb_to_ycbcr')
-def split_rgb_to_ycbcr(rgb):
+def split_rgb_to_ycbcr(rgb:torch.Tensor):
     """
     Convert RGB to YCbCr channels using OpenCV's RGB to YCbCr conversion.
     """
-    rgb = rgb * 255
+    if rgb.max()>1.:
+        pass
+    else:
+        rgb = rgb * 255
 
     if len(rgb.shape) == 3:
         r, g, b = rgb[0], rgb[1], rgb[2]
@@ -90,15 +86,15 @@ def split_rgb_to_ycbcr(rgb):
 
 
 @torch.cuda.nvtx.range('process_channel_forward')
-def process_channel_forward(channel):
+def process_channel_forward(channel,patch_size=4):
     """
     Dequantize and apply IDCT for each 8x8 block.
     """
     if len(channel.shape) == 3:
-        channel = rea_f(channel)
+        channel = patchfication(channel,patch_size)
         channel = dct.dct_2d(channel, norm='ortho')  # *np.sqrt(2.0)
     elif len(channel.shape) == 4:
-        channel = b_rea_f(channel)
+        channel = patchfication(channel,patch_size)
         channel = dct.dct_2d(channel, norm='ortho')  # *(32)#*np.sqrt(2.0)
     return channel
 
@@ -157,12 +153,13 @@ def _to_float(x):
 
 
 
-def rgb_to_spec_tokenize(img, mode=2):
+def rgb_to_spec_tokenize(img,patch_size=4 ,mode=2):
     """
     img: torch.Tensor or np.ndarray
          shape ...xH x W  (마지막 두 축이 H,W)
     mode: 0=4:4:4, 1=4:2:2 (W/2), 2=4:2:0 (H/2,W/2)
     """
+    #TODO: Mode 0,1 support (WK Han)
     h, w = img.shape[-2], img.shape[-1]
     y, cb, cr = split_rgb_to_ycbcr(img)  # 타입 유지 가정
 
@@ -183,35 +180,29 @@ def rgb_to_spec_tokenize(img, mode=2):
 
     # --- channel processing ---
     # 형 일치 + float 보장 후 -128
-    y = process_channel_forward(_to_float(y) - 128)
-    cb = process_channel_forward(_to_float(cb) - 128)
-    cr = process_channel_forward(_to_float(cr) - 128)
-
+    y = process_channel_forward(_to_float(y) - 128,patch_size)
+    cb = process_channel_forward(_to_float(cb) - 128,patch_size)
+    cr = process_channel_forward(_to_float(cr) - 128,patch_size)
     if y.ndim == 5:
-        # cbcr 쌓기 (C 채널 기준)
+        # non-batched
         cbcr = _cat([cb, cr], axis=0)  # (2C, H', W')
-
-        # 아래 permute/reshape는 원래 코드의 형태를 그대로 보존
-        # y: (C,H,W) -> (C, ph, pw, nH, nW) 순을 (C,nH,nW,ph,pw)로 바꾼 뒤 패치 플랫
-        y_ = _permute(y, (0, 3, 4, 1, 2)) if y.ndim == 5 else y  # 안전 처리(이미 patchified일 수 있으니)
-        y = patchfication_nonbatch(_reshape(y_, (-1, h // 4, w // 4))).reshape(-1, h // 8, w // 8)
-
+        y_ = _permute(y, (0, 3, 4, 1, 2)) if y.ndim == 5 else y  
+        y = patchfication(_reshape(y_, (-1, h // patch_size, w // patch_size))).reshape(-1, h // (patch_size*2), w // (patch_size*2))
         cbcr_ = _permute(cbcr, (0, 3, 4, 1, 2)) if cbcr.ndim == 5 else cbcr
-        cbcr = _reshape(cbcr_, (-1, h // 8, w // 8))
-
+        cbcr = _reshape(cbcr_, (-1, h // (patch_size*2), w // (patch_size*2)))
         return _cat([y, cbcr], axis=0)
 
     elif y.ndim == 6:
-        # (N,C,H,W) 케이스
+        # batched case
         cbcr = _cat([cb, cr], axis=1)  # (N, 2C, H', W')
 
         y_ = _permute(y, (0, 1, 4, 5, 2, 3)) if y.ndim == 6 else y
         y = patchfication(
-                _reshape(y_, (y.shape[0], -1, h // 4, w // 4))
-             ).reshape(y.shape[0], -1, h // 8, w // 8)
+                _reshape(y_, (y.shape[0], -1, h // patch_size, w // patch_size))
+             ).reshape(y.shape[0], -1, h // (patch_size*2), w // (patch_size*2))
 
         cbcr_ = _permute(cbcr, (0, 1, 4, 5, 2, 3)) if cbcr.ndim == 6 else cbcr
-        cbcr = _reshape(cbcr_, (y.shape[0], -1, h // 8, w // 8))
+        cbcr = _reshape(cbcr_, (y.shape[0], -1, h // (patch_size*2), w // (patch_size*2)))
 
         return _cat([y, cbcr], axis=1)
 
@@ -238,6 +229,8 @@ class Qwen2VLImageProcessorDCT(_Base):
         do_convert_rgb: Optional[bool] = None,
         data_format: Optional[ChannelDimension] = ChannelDimension.FIRST,
         input_data_format: Optional[Union[str, ChannelDimension]] = None,
+        ##
+        dct_size:int = 4,
     ):
         """
         Preprocess an image or batch of images. Copy of the `preprocess` method from `CLIPImageProcessor`.
@@ -307,7 +300,7 @@ class Qwen2VLImageProcessorDCT(_Base):
                 resized_height, resized_width = smart_resize(
                     height,
                     width,
-                    factor=patch_size * merge_size,
+                    factor=patch_size * merge_size * dct_size*2,
                     min_pixels=size["shortest_edge"],
                     max_pixels=size["longest_edge"],
                 )
@@ -318,23 +311,14 @@ class Qwen2VLImageProcessorDCT(_Base):
             if do_rescale:
                 image = self.rescale(image, scale=rescale_factor, input_data_format=input_data_format)
 
-            # if do_normalize:
-            #     image = self.normalize(
-            #         image=image, mean=image_mean, std=image_std, input_data_format=input_data_format
-            #     )
-
             image = to_channel_dimension_format(image, data_format, input_channel_dim=input_data_format)
             processed_images.append(image)
 
         patches = np.array(processed_images)
-        patches = rgb_to_spec_tokenize(torch.Tensor(patches)).numpy()
-        resized_height, resized_width = resized_height // 8, resized_width // 8
-        # patches = rgb_to_spec_tokenize((patches))#.numpy()
+        patches = rgb_to_spec_tokenize(torch.Tensor(patches),dct_size).numpy()
 
-        # print(patches)
-        print(patches.shape)
-        print(patch_size)
-        patch_size
+
+        resized_height, resized_width = resized_height // 8, resized_width // 8
         if data_format == ChannelDimension.LAST:
             patches = patches.transpose(0, 3, 1, 2)
         if patches.shape[0] % temporal_patch_size != 0:
@@ -345,7 +329,6 @@ class Qwen2VLImageProcessorDCT(_Base):
         channel = patches.shape[1]
         grid_t = patches.shape[0] // temporal_patch_size
         grid_h, grid_w = resized_height // patch_size, resized_width // patch_size
-        # print(patches.shape)
         patches = patches.reshape(
             grid_t,
             temporal_patch_size,
@@ -357,7 +340,6 @@ class Qwen2VLImageProcessorDCT(_Base):
             merge_size,
             patch_size,
         )
-        print(patches.shape)
         patches = patches.transpose(0, 3, 6, 4, 7, 2, 1, 5, 8)
         flatten_patches = patches.reshape(
             grid_t * grid_h * grid_w, channel * temporal_patch_size * patch_size * patch_size

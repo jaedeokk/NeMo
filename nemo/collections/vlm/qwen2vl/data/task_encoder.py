@@ -1,3 +1,4 @@
+
 # Copyright (c) 2025, NVIDIA CORPORATION.  All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +20,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List
+import PIL, io
 
 import numpy as np
 import torch
@@ -131,7 +133,10 @@ def cook_chatml_sample(sample: dict) -> ChatMLSample:
     if imgs:
         imgs = pickle.loads(imgs)
         if isinstance(imgs, list) and len(imgs) > 0:
-            imgs = [Image.fromarray(d) for d in imgs]
+            try:
+                imgs = [Image.open(io.BytesIO(d)).convert("RGB") for d in imgs]
+            except:
+                imgs = [Image.fromarray(d) for d in imgs]
         else:
             imgs = None
     videos = sample.get('videos', None)

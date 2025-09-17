@@ -40,6 +40,7 @@ import torch
 from lightning.pytorch.loggers import WandbLogger
 from megatron.core.optimizer import OptimizerConfig
 from transformers.models.qwen2_vl.image_processing_qwen2_vl import Qwen2VLImageProcessor
+from nemo.collections.vlm.qwen2vl.data.preprocess_dct import Qwen2VLImageProcessorDCT
 
 from nemo import lightning as nl
 from nemo.collections import llm, vlm
@@ -72,8 +73,12 @@ def main(args):
     max_sequence_length = args.max_sequence_length
     tokenizer = AutoTokenizer(hf_model_name)
     min_pixels,max_pixels = args.min_pixels, args.max_pixels
-    image_processor = Qwen2VLImageProcessor(min_pixels=min_pixels,
+    if args.dct:
+        image_processor = Qwen2VLImageProcessorDCT(min_pixels=min_pixels,
                                             max_pixels=max_pixels)
+    else:
+        image_processor = Qwen2VLImageProcessor(min_pixels=min_pixels,
+                                                max_pixels=max_pixels)
     if args.data_type == "qwen2vl":
         # Data configuration
         data_config = Qwen2VLDataConfig(
@@ -131,7 +136,9 @@ def main(args):
         seq_length=max_sequence_length,
     )
 
-    vision_transformer_config = vlm.Qwen2VLVisionConfig()
+    vision_in_ch = 96 if args.dct else 3
+    vision_transformer_config = vlm.Qwen2VLVisionConfig(in_channels=vision_in_ch)
+    # vision_transformer_config = vlm.Qwen2VLVisionConfig()
 
     vision_projection_config = vlm.MultimodalProjectorConfig(
         projector_type=args.projector_type,
@@ -287,13 +294,14 @@ if __name__ == "__main__":
     parser.add_argument("--wandb_project", type=str, required=False, default=None)
     parser.add_argument("--gbs", type=int, required=False, default=64, help="Global batch size")
     parser.add_argument("--mbs", type=int, required=False, default=2, help="Micro batch size")
-    parser.add_argument('--min_pixels',type=int,default=784,help="Minimum pixel numbers")
-    parser.add_argument('--max_pixels',type=int,default=50176,help="Maximum pixel numbers")
+    parser.add_argument('--min_pixels',type=int,default=None,help="Minimum pixel numbers")
+    parser.add_argument('--max_pixels',type=int,default=None,help="Maximum pixel numbers")
     parser.add_argument("--lr", type=float, required=False, default=2.0e-06, help="Learning rate")
     parser.add_argument('--enable_sp', action='store_true', help="enable sequence parallel")
     parser.add_argument(
         "--max_sequence_length", type=int, required=False, default=4096, help="Maximum sequence length"
     )
+    parser.add_argument('--dct',action='store_true',help="Switch for a DCT dataloader")
 
     args = parser.parse_args()
     main(args)
