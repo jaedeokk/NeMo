@@ -8,7 +8,8 @@ LANGUAGE_MODEL_PATH="/models/Qwen2-VL-2B-Instruct-nemo"
 
 # Parallelism configruration
 DEVICES=4
-TP_SIZE=1
+TP_SIZE=2
+PP_SIZE=2
 # CP_SIZE=2
 
 # Batch size
@@ -34,6 +35,7 @@ ARGS="--data_type $DATA_TYPE \
       --image_folder /datasets/ \
       --devices $DEVICES \
       --tp_size $TP_SIZE \
+      --pp_size $PP_SIZE \
       --name $EXPERIMENT_NAME \
       --mbs $MBS \
       --gbs $GBS \

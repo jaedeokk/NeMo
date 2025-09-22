@@ -44,10 +44,11 @@ def patch_merge(x:torch.Tensor):
 
 
 @torch.cuda.nvtx.range('process_channel')
-def process_channel(channel, qmap):
+def process_channel(channel, qmap,normalize= True):
     """
     Dequantize and apply IDCT for each 8x8 block.
     """
+    block_size = channel.shape[-1]
     if len(channel.shape) == 5:
         channel = channel[:, :, :, :, :] * qmap[None, None, None, :, :]  #
         channel = dct.idct_2d(channel, norm='ortho')
@@ -56,6 +57,11 @@ def process_channel(channel, qmap):
         channel = channel[:, :, :, :, :, :] * qmap[:, None, None, None, :, :]
         channel = dct.idct_2d(channel, norm='ortho')
         channel = patch_merge(channel)
+    if normalize:
+        import math
+        min_chan = -(2**(int(math.log2(block_size)) +7))
+        max_chan = - min_chan - block_size
+        channel = ((channel -min_chan)/(max_chan-min_chan)) *2 - 1
     return channel
 
 
@@ -86,7 +92,7 @@ def split_rgb_to_ycbcr(rgb:torch.Tensor):
 
 
 @torch.cuda.nvtx.range('process_channel_forward')
-def process_channel_forward(channel,patch_size=4):
+def process_channel_forward(channel,patch_size=4,normalize=True):
     """
     Dequantize and apply IDCT for each 8x8 block.
     """
@@ -96,6 +102,11 @@ def process_channel_forward(channel,patch_size=4):
     elif len(channel.shape) == 4:
         channel = patchfication(channel,patch_size)
         channel = dct.dct_2d(channel, norm='ortho')  # *(32)#*np.sqrt(2.0)
+    if normalize:
+        import math
+        min_chan = -(2**(int(math.log2(patch_size)) +7))
+        max_chan = - min_chan - patch_size
+        channel = ((channel -min_chan)/(max_chan-min_chan)) *2 - 1
     return channel
 
 def _is_torch(x):

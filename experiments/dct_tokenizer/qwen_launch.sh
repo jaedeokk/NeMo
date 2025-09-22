@@ -8,12 +8,13 @@ LANGUAGE_MODEL_PATH="/models/Qwen2-VL-2B-Instruct-nemo"
 
 # Parallelism configruration
 DEVICES=4
-TP_SIZE=1
+TP_SIZE=2 ### TP_1 TODO + Virtual PP
+PP_SIZE=2 ### PP_4 
 # CP_SIZE=2
 
 # Batch size
-MBS=1
-GBS=4
+MBS=1 # 2
+GBS=4 # 8 
 
 #Pixel Nums
 MINPIXELS=784
@@ -32,6 +33,7 @@ ARGS=(
   "--image_folder" "/datasets/"
   "--devices" "$DEVICES"
   "--tp_size" "$TP_SIZE"
+  "--pp_size" "$PP_SIZE"
   "--name" "$EXPERIMENT_NAME"
   "--mbs" "$MBS"
   "--gbs" "$GBS"
@@ -40,8 +42,8 @@ ARGS=(
   "--max_sequence_length" "4096"
   "--min_pixels" "$MINPIXELS"
   "--max_pixels" "$MAXPIXELS"
-  "--restore_path" "$LANGUAGE_MODEL_PATH"
 )
+ # "--restore_path" "$LANGUAGE_MODEL_PATH"
 
 # Run the experiment with torchrun
 echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
