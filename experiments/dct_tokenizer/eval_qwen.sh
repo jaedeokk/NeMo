@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # Configuration variables
-NUM_PROC_PER_NODE=1  # Set the number of processes per node
+NUM_PROC_PER_NODE=4  # Set the number of processes per node
 
 # Parallelism configruration
-DEVICES=1
-TP_SIZE=1 ### TP_1 TODO + Virtual PP
-PP_SIZE=1 ### PP_4 
+DEVICES=4
+TP_SIZE=2 ### TP_1 TODO + Virtual PP
+PP_SIZE=2 ### PP_4 
 # CP_SIZE=2
 
 
 # Exp logging path
 # CKPT_DIR="/workspace/experiments_finetune/baseline/Qwen2VL_baseline_finetune_2B2_CP_MBS1_GBS4_seqpack_/Qwen2VL_baseline_finetune_2B2_CP_MBS1_GBS4_seqpack_--reduced_train_loss=3.5755-epoch=1-consumed_samples=20760.0-last/weights"
-CKPT_DIR="/models/Qwen2-VL-2B-Instruct-nemo/weights/"
+CKPT_DIR="PATH_TO_YOUR_WEIGHT"
 
 # Construct the arguments stringring
 ARGS=(
@@ -23,7 +23,6 @@ ARGS=(
 )
 
 # Run the experiment with torchrun
-echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"
 echo "NUM_PROC_PER_NODE: ${NUM_PROC_PER_NODE}"
 echo "ARGS: ${ARGS[@]}"
 
