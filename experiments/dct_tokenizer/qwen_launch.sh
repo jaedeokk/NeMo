@@ -21,9 +21,9 @@ MINPIXELS=784
 MAXPIXELS=43904
 
 # Exp logging path
-EXPERIMENT_NAME="Qwen2VL_finetune_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack"
+EXPERIMENT_NAME="Qwen2VL_baseline_finetune_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack_"
 WANDB_PROJECT="Qwen2VL"
-LOG_DIR="./experiments_finetune"
+LOG_DIR="./experiments_finetune/baseline/"
 # RESTORE_PATH="/workspace/experiments_pretrain/LLaVA-NeXT_ptr_TP4_CP1_seqpack_with_val_loss--reduced_train_loss=2.0088-epoch=46-consumed_samples=44800.0"
 
 # Construct the arguments stringring

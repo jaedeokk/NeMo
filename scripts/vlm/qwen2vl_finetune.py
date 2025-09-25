@@ -165,6 +165,7 @@ def main(args):
     strategy = nl.MegatronStrategy(
         tensor_model_parallel_size=args.tp_size,
         pipeline_model_parallel_size=args.pp_size,
+        virtual_pipeline_model_parallel_size=args.vp_size if args.vp_size > 0 else None,
         encoder_pipeline_model_parallel_size=args.encoder_pp_size,
         pipeline_dtype=torch.bfloat16,
         sequence_parallel=args.enable_sp,
@@ -185,7 +186,7 @@ def main(args):
         save_optim_on_train_end=False,
         save_top_k=2,
         every_n_train_steps=1000,
-        dirpath=args.log_dir,
+        dirpath=args.log_dir + args.name,
     )
 
     # Trainer setup
@@ -301,6 +302,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_sequence_length", type=int, required=False, default=4096, help="Maximum sequence length"
     )
+    parser.add_argument("--vp_size", type=int, required=False, default=0,
+                   help="virtual pipeline model parallel size (interleaved PP)")
     parser.add_argument('--dct',action='store_true',help="Switch for a DCT dataloader")
 
     args = parser.parse_args()
