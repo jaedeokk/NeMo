@@ -29,6 +29,47 @@ import nemo.lightning as nl
 from nemo.collections.vlm import Qwen2VLConfig2B, Qwen2VLModel
 from nemo.utils import logging
 
+from nemo.collections import llm, vlm
+from nemo.collections.vlm import MultimodalProjectorConfig, Qwen2VLVisionConfig, Qwen2VLConfig
+
+
+def build_finetune_arch(tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
+    SIZE_INFO_MAP = {
+        "2B": {"hf_model_name": "Qwen/Qwen2-VL-2B-Instruct", "llmconfig_class": llm.Qwen2Config1P5B},
+        "7B": {"hf_model_name": "Qwen/Qwen2-VL-7B-Instruct", "llmconfig_class": llm.Qwen2Config7B},
+    }
+    model_size = "2B"
+    _, llm_config_class = (
+        SIZE_INFO_MAP[model_size]["hf_model_name"],
+        SIZE_INFO_MAP[model_size]["llmconfig_class"],
+    )
+
+    language_transformer_config = llm_config_class(
+        seq_length=max_sequence_length,
+    )
+
+    vision_in_ch = 96 if dct else 3
+    vision_transformer_config = vlm.Qwen2VLVisionConfig(in_channels=vision_in_ch)
+
+    vision_projection_config = vlm.MultimodalProjectorConfig(
+        projector_type=projector_type,
+        input_size=vision_transformer_config.ffn_hidden_size,
+        hidden_size=language_transformer_config.hidden_size,
+        ffn_hidden_size=vision_transformer_config.ffn_hidden_size,
+    )
+
+    qwen2vl_config = vlm.Qwen2VLConfig(
+        language_transformer_config=language_transformer_config,
+        vision_transformer_config=vision_transformer_config,
+        vision_projection_config=vision_projection_config,
+        language_model_from_pretrained=None,  #
+        freeze_language_model=False,
+        freeze_vision_model=True,
+    )
+
+    return Qwen2VLModel(qwen2vl_config, tokenizer=tokenizer)
+
+
 
 def load_image(image_url: str) -> Image.Image:
     # pylint: disable=C0115,C0116
@@ -75,7 +116,13 @@ def main(args) -> None:
     if args.load_from_hf:
         model = fabric.import_model("hf://Qwen/Qwen2-VL-2B-Instruct", Qwen2VLModel)
     else:
-        model = Qwen2VLModel(Qwen2VLConfig2B(), tokenizer=hf_tokenizer)
+        # model = Qwen2VLModel(Qwen2VLConfig2B(), tokenizer=hf_tokenizer)
+        model = build_finetune_arch(
+        tokenizer=hf_tokenizer,
+        dct=False,                  #
+        max_sequence_length=min_pixels,   
+        projector_type="mcore_mlp", # 
+        )
         model = fabric.load_model(args.local_model_path, model)
     model = model.module.cuda()
     model.eval()

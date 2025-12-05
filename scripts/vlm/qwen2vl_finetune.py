@@ -40,7 +40,7 @@ import torch
 from lightning.pytorch.loggers import WandbLogger
 from megatron.core.optimizer import OptimizerConfig
 from transformers.models.qwen2_vl.image_processing_qwen2_vl import Qwen2VLImageProcessor
-from nemo.collections.vlm.qwen2vl.data.preprocess_dct import Qwen2VLImageProcessorDCT
+# try:
 
 from nemo import lightning as nl
 from nemo.collections import llm, vlm
@@ -50,6 +50,7 @@ from nemo.collections.vlm.qwen2vl.data.task_encoder import Qwen2VLTaskEncoder
 from nemo.lightning.pytorch.optim import CosineAnnealingScheduler
 from nemo.lightning.pytorch.optim.megatron import MegatronOptimizerModule
 from nemo.utils.exp_manager import TimingCallback
+from nemo.collections.vlm.qwen2vl.data.preprocess_dct import Qwen2VLImageProcessorDCT
 
 
 def main(args):
