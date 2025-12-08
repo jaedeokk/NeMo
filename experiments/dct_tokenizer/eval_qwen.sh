@@ -11,7 +11,7 @@ PP_SIZE=1 ### PP_4
 
 
 # Exp logging path
-CKPT_DIR="/workspace/experiments/dct_tokenizer/experiments_finetune/baseline/Qwen2VL_baseline_finetune_2B1_CP_MBS2_GBS8_seqpack_/Qwen2VL_baseline_finetune_2B1_CP_MBS2_GBS8_seqpack_--reduced_train_loss=4.0691-epoch=1-consumed_samples=41520.0-last/weights"
+CKPT_DIR="./experiments_finetune/baseline/Qwen2VL_baseline_finetune_2B1_CP1_MBS2_GBS8_seqpack_/Qwen2VL_baseline_finetune_2B1_CP1_MBS2_GBS8_seqpack_--reduced_train_loss=0.6073-epoch=1-consumed_samples=1016000.0"
 # CKPT_DIR="PATH_TO_YOUR_WEIGHT"
 
 # Construct the arguments stringring
