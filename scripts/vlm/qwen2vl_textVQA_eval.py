@@ -47,6 +47,12 @@ def build_messages(image_path_or_url: str, question: str):
     Returns:
         list: A 'messages' list compatible with Qwen2VL processor.
     """
+    prompt = (
+                "You are a visual question answering assistant. "
+                "Read the text in the image and answer the question. "
+                "Answer with a short phrase (at most 3 words).\n\n"
+                f"Question: {question}\nAnswer:"
+    )
     return [
         {
             "role": "user",
@@ -57,7 +63,7 @@ def build_messages(image_path_or_url: str, question: str):
                 },
                 {
                     "type": "text",
-                    "text": question,
+                    "text": prompt,
                 },
             ],
         }
@@ -65,12 +71,8 @@ def build_messages(image_path_or_url: str, question: str):
 
 
 def generate_one_answer(model, processor, hf_tokenizer, inputs, osl: int):
-    """지금 네 greedy loop를 함수로 분리한 버전."""
-    import torch
-
     with torch.no_grad():
         input_ids = inputs['input_ids'].clone().to("cuda")
-        # special image token → NeMo용 ID
         input_ids[input_ids == 151655] = -200
 
         image_grid_thw = inputs['image_grid_thw'].clone().to("cuda")
@@ -147,12 +149,12 @@ def run_textvqa_eval(args, processor, hf_tokenizer, model):
     print(f"Saved predictions to {args.output_json}")
 
 
-def build_finetune_arch(tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
+def build_finetune_arch(args,tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
     SIZE_INFO_MAP = {
         "2B": {"hf_model_name": "Qwen/Qwen2-VL-2B-Instruct", "llmconfig_class": llm.Qwen2Config1P5B},
         "7B": {"hf_model_name": "Qwen/Qwen2-VL-7B-Instruct", "llmconfig_class": llm.Qwen2Config7B},
     }
-    model_size = "2B"
+    model_size = args.model_size
     _, llm_config_class = (
         SIZE_INFO_MAP[model_size]["hf_model_name"],
         SIZE_INFO_MAP[model_size]["llmconfig_class"],
@@ -218,17 +220,32 @@ def main(args) -> None:
     # The default range for the number of visual tokens per image in the model is 4-16384. You can set min_pixels
     # and max_pixels according to your needs, such as a token count range of 256-1280, to balance speed and memory
     # usage.
+    SIZE_INFO_MAP = {
+        "2B": {"hf_model_name": "Qwen/Qwen2-VL-2B-Instruct", "llmconfig_class": llm.Qwen2Config1P5B},
+        "7B": {"hf_model_name": "Qwen/Qwen2-VL-7B-Instruct", "llmconfig_class": llm.Qwen2Config7B},
+    }
+    model_size = args.model_size
+    hf_model_name, _ = (
+        SIZE_INFO_MAP[model_size]["hf_model_name"],
+        SIZE_INFO_MAP[model_size]["llmconfig_class"],
+    )
+
     min_pixels = 16 * 28 * 28
     max_pixels = 64 * 28 * 28
     processor = AutoProcessor.from_pretrained(
-        "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels
+        # "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels
+        hf_model_name, 
+        min_pixels=min_pixels, 
+        max_pixels=max_pixels
+
     )
     hf_tokenizer = processor.tokenizer
 
     fabric = trainer.to_fabric()
     # Decide whether to import or load the model based on the input arguments
     if args.load_from_hf:
-        model = fabric.import_model("hf://Qwen/Qwen2-VL-2B-Instruct", Qwen2VLModel)
+        model = fabric.import_model("hf://" +hf_model_name,
+         Qwen2VLModel)
     else:
         # model = Qwen2VLModel(Qwen2VLConfig2B(), tokenizer=hf_tokenizer)
         model = build_finetune_arch(
@@ -252,7 +269,10 @@ def main(args) -> None:
                     "type": "image",
                     "image": args.image_url,
                 },
-                {"type": "text", "text": "Describe this image."},
+                {
+                    "type": "text", 
+                    "text": "Describe this image."
+                },
             ],
         }
     ]
@@ -337,6 +357,12 @@ if __name__ == "__main__":
     default="pred_textvqa_val.json",
     help="Where to save predictions (question_id, answer).",
     )
+    parser.add_argument(
+    "--model_size",
+    type=str,
+    default="2B",
+    choices=["2B", "7B"],
+    help="Qwen2-VL model size")
     parser.add_argument('--osl', type=int, default=30, help='output seq length')
     parser.add_argument('--tp_size', type=int, default=1, help='tensor parallel size')
     parser.add_argument('--pp_size', type=int, default=1, help='pipeline parallel size')

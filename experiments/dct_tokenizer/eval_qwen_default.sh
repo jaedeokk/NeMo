@@ -14,7 +14,7 @@ ARGS=(
   "--image_url" "$IMAGE_PATH"
   "--tp_size" "$TP_SIZE"
   "--pp_size" "$PP_SIZE"
-  )
+    )
 
 # Run the experiment with torchrun
 
