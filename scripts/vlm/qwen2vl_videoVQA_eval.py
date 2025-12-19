@@ -49,7 +49,9 @@ def build_messages(video_path_or_url: str, question: str, one_word: bool = True)
     return [{
         "role": "user",
         "content": [
-            {"type": "video", "video": video_path_or_url},
+            {"type": "video", "video": video_path_or_url,                    
+            "fps": 1.0, #
+            },
             {"type": "text", "text": prompt},
         ],
     }]
@@ -162,10 +164,20 @@ def generate_one_answer_video(model, processor, hf_tokenizer, messages, osl: int
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     image_inputs, video_inputs = process_vision_info(messages)
 
+    max_total_len = 4096  # HF import NeMo Qwen2-VL이면 사실상 고정
+    reserve_gen = osl     # 생성 토큰 공간 확보 (greedy면 이 정도 잡는 게 안전)
+
+    # text에 허용할 최대 길이
+    max_text_len = max_total_len  - reserve_gen
+    if max_text_len < 1:
+        max_text_len = 1
+
     inputs = processor(
         text=[text],
         images=image_inputs,
         videos=video_inputs,
+        truncation=True,          # <-- 중요
+        max_length=max_text_len,  # <-- 중요: 텍스트를 여기서 잘라서 4096 안에 넣음
         padding=True,
         return_tensors="pt",
     )
@@ -183,11 +195,16 @@ def generate_one_answer_video(model, processor, hf_tokenizer, messages, osl: int
     for _ in range(osl):
         logits = model(
             input_ids=generated_ids,
-            attention_mask=generated_mask,
+            attention_mask=None,
             position_ids=None,
             pixel_values_videos=pixel_values_videos,
             video_grid_thw=video_grid_thw,
         )
+        # print(
+        #     'logits:',logits.shape,'\n'
+        #     'mask:',generated_mask.shape,'\n',
+        #     'pixel values:',pixel_values_videos.shape,'\n'
+        #     'video_grid_thw:',video_grid_thw.shape,'\n')
         next_token = torch.argmax(logits[:, -1], dim=-1, keepdim=True)
         generated_ids = torch.cat([generated_ids, next_token], dim=-1)
         generated_mask = torch.cat(
@@ -196,7 +213,7 @@ def generate_one_answer_video(model, processor, hf_tokenizer, messages, osl: int
         )
         if next_token.item() == hf_tokenizer.eos_token_id:
             break
-
+    # print('-------------------')
     generated_ids[generated_ids < 0] = 0
     trimmed = [out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs["input_ids"], generated_ids)]
     text_out = processor.batch_decode(trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
