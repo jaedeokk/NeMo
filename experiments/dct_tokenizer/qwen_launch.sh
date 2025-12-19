@@ -1,28 +1,29 @@
 #!/bin/bash
 
 # Configuration variables
-NUM_PROC_PER_NODE=4  # Set the number of processes per node
+NUM_PROC_PER_NODE=1  # Set the number of processes per node
 DATA_TYPE="energon"
 DATA_PATH="/datasets/Cambrian737k-wds"
 LANGUAGE_MODEL_PATH="/models/Qwen2-VL-2B-Instruct-nemo"
 
 # Parallelism configruration
-DEVICES=4
-TP_SIZE=1
-# CP_SIZE=2
+DEVICES=1
+TP_SIZE=1 ### TP_1 TODO + Virtual PP
+PP_SIZE=1 ### PP_4 
+CP_SIZE=1
 
 # Batch size
-MBS=1
-GBS=4
+MBS=2 # 2
+GBS=8 # 8 
 
 #Pixel Nums
 MINPIXELS=784
 MAXPIXELS=43904
-
+MAXSETPS=5190000
 # Exp logging path
-EXPERIMENT_NAME="Qwen2VL_finetune_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack"
+EXPERIMENT_NAME="Qwen2VL_baseline_finetune_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack_"
 WANDB_PROJECT="Qwen2VL"
-LOG_DIR="./experiments_finetune"
+LOG_DIR="./experiments_finetune/baseline/"
 # RESTORE_PATH="/workspace/experiments_pretrain/LLaVA-NeXT_ptr_TP4_CP1_seqpack_with_val_loss--reduced_train_loss=2.0088-epoch=46-consumed_samples=44800.0"
 
 # Construct the arguments stringring
@@ -32,6 +33,7 @@ ARGS=(
   "--image_folder" "/datasets/"
   "--devices" "$DEVICES"
   "--tp_size" "$TP_SIZE"
+  "--pp_size" "$PP_SIZE"
   "--name" "$EXPERIMENT_NAME"
   "--mbs" "$MBS"
   "--gbs" "$GBS"
@@ -40,8 +42,9 @@ ARGS=(
   "--max_sequence_length" "4096"
   "--min_pixels" "$MINPIXELS"
   "--max_pixels" "$MAXPIXELS"
-  "--restore_path" "$LANGUAGE_MODEL_PATH"
+  "--max_steps" "$MAXSETPS"
 )
+ # "--restore_path" "$LANGUAGE_MODEL_PATH"
 
 # Run the experiment with torchrun
 echo "LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}"

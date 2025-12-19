@@ -126,8 +126,51 @@ Launch fine-tuning process:
 ```bash
 bash qwen_launch.sh
 ```
+# Bug Report
+First, to reproduce this bug, the path of the image to be tested (if not specified, removing the flag will make it work with the default URL) and the path of the model saved as .distcp are required. This saving was done by training 4.training above with PP and TP greater than or equal to 2 (in my case, 2 each).
 
-TBA
+---
+## Case 1: Huggingface loading
+If the following code is executed first, the model will be directly retrieved from Hugging Face and loaded. However, in this case as well, after the model is loaded, it does not work if TP/PP are set to values greater than 2.
+```bash
+bash eval_qwen_default.sh
+```
+In this case, the error message comes out as follows.
+### Error Message
+
+```bash
+[rank3]
+ File "/opt/megatron-lm/megatron/core/transformer/transformer_block.py", line 544, in forward
+hidden_states = make_viewless_tensor(inp=hidden_states, requires_grad=True, keep_graph=True)
+ File "/opt/megatron-lm/megatron/core/utils.py", line 595, in make_viewless_tensor  
+ if inp._base is None:                                                                                             
+AttributeError: 'NoneType' object has no attribute '_base'     
+
+[rank0]
+File "/workspace/scripts/vlm/qwen2vl_generate.py", line 127, in main 
+ generated_ids = torch.cat([generated_ids, next_token_ids], dim=-1)
+RuntimeError: Sizes of tensors must match except in dimension 1. Expected size 1 but got size 4096 for tensor number 1 in the list. 
+```
+## Case 2: Local checkpoint loading
+`CKPT_DIR` should be filled first.
+
+```bash
+bash eval_qwen.sh
+```
+In this case, the error message appears as follows regardless of tensor parallelisms.
+```bash
+File "/workspace/scripts/vlm/qwen2vl_generate.py", line 79, in main 
+    model = fabric.load_model(args.local_model_path, model)  
+File "/workspace/nemo/lightning/fabric/fabric.py", line 86, in load_model  
+     self.load(path, {"state_dict": dist_model})
+     ..
+     ..
+File "/opt/megatron-lm/megatron/core/dist_checkpointing/strategies/torch.py", line 558, in _validate_global_shapes
+     raise KeyError
+     KeyError: "module.vision_projection.0.weight from model not in state dict: ['module.language_model.decoder.final_layernorm._extra_state/shard_0_1', 'module.language_model.decoder.final_layernorm.weight', 'module.language_model.decoder.layers.mlp.linear_fc1._extra_state/shard_0_28', 'module.language_model.decoder.layers.mlp.linear_fc1._extra_state/shar..
+..
+```
+
 
 ## Training Output
 

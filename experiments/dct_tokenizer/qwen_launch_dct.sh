@@ -9,7 +9,8 @@ LANGUAGE_MODEL_PATH="/models/Qwen2-VL-2B-Instruct-nemo"
 # Parallelism configruration
 DEVICES=4
 TP_SIZE=1
-# CP_SIZE=2
+PP_SIZE=2
+VP_SIZE=2
 
 # Batch size
 MBS=1
@@ -22,7 +23,7 @@ MAXPIXELS=200704
 # Exp logging path
 EXPERIMENT_NAME="Qwen2VL_finetune_DCT_2B${TP_SIZE}_CP${CP_SIZE}_MBS${MBS}_GBS${GBS}_seqpack"
 WANDB_PROJECT="Qwen2VL"
-LOG_DIR="./experiments_finetune"
+LOG_DIR="./experiments_finetune/dct_vp"
 # RESTORE_PATH="/workspace/experiments_pretrain/LLaVA-NeXT_ptr_TP4_CP1_seqpack_with_val_loss--reduced_train_loss=2.0088-epoch=46-consumed_samples=44800.0"
 
 #DCT mode
@@ -34,6 +35,8 @@ ARGS="--data_type $DATA_TYPE \
       --image_folder /datasets/ \
       --devices $DEVICES \
       --tp_size $TP_SIZE \
+      --pp_size $PP_SIZE \
+      --vp_size $VP_SIZE \
       --name $EXPERIMENT_NAME \
       --mbs $MBS \
       --gbs $GBS \

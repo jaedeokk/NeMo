@@ -32,13 +32,129 @@ from nemo.utils import logging
 from nemo.collections import llm, vlm
 from nemo.collections.vlm import MultimodalProjectorConfig, Qwen2VLVisionConfig, Qwen2VLConfig
 
+from io import BytesIO
+import os
+from tqdm import tqdm
 
-def build_finetune_arch(tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
+def build_messages(image_path_or_url: str, question: str):
+    """
+    Construct the Qwen2VL message format for a single VQA sample.
+    
+    Parameters:
+        image_path_or_url (str): Local image path or image URL.
+        question (str): TextVQA question string.
+    
+    Returns:
+        list: A 'messages' list compatible with Qwen2VL processor.
+    """
+    prompt = (
+                "You are a visual question answering assistant. "
+                "Read the text in the image and answer the question. "
+                "Answer with a short phrase (at most 3 words).\n\n"
+                f"Question: {question}\nAnswer:"
+    )
+    return [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": image_path_or_url,
+                },
+                {
+                    "type": "text",
+                    "text": prompt,
+                },
+            ],
+        }
+    ]
+
+
+def generate_one_answer(model, processor, hf_tokenizer, inputs, osl: int):
+    with torch.no_grad():
+        input_ids = inputs['input_ids'].clone().to("cuda")
+        input_ids[input_ids == 151655] = -200
+
+        image_grid_thw = inputs['image_grid_thw'].clone().to("cuda")
+        pixel_values = inputs['pixel_values'].clone().to("cuda")
+
+        generated_ids = input_ids
+        for _ in range(osl):
+            output = model(
+                pixel_values=pixel_values,
+                input_ids=input_ids,
+                position_ids=None,
+                attention_mask=None,
+                image_grid_thw=image_grid_thw,
+            )
+
+            next_token_ids = torch.argmax(output[:, -1], dim=-1, keepdim=True)
+            generated_ids = torch.cat([generated_ids, next_token_ids], dim=-1)
+            input_ids = generated_ids
+
+            if next_token_ids.item() == hf_tokenizer.eos_token_id:
+                break
+
+        generated_ids[generated_ids < 0] = 0
+        trimmed = [out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)]
+        texts = processor.batch_decode(
+            trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )
+        return texts[0].strip()
+
+def run_textvqa_eval(args, processor, hf_tokenizer, model):
+    import json
+    from qwen_vl_utils import process_vision_info
+
+    with open(args.json_path, "r") as f:
+        ann = json.load(f)
+
+    data = ann["data"]
+    results = []
+
+    for item in tqdm(data, desc="TextVQA val"):
+        qid = item["question_id"]
+        question = item["question"]
+        image_id = item["image_id"]
+
+        image_path = os.path.join(args.image_folder, f"{image_id}.jpg")
+        if not os.path.exists(image_path):
+            print(f"[WARN] missing image: {image_path}")
+            continue
+
+        messages = build_messages(image_path, question)
+
+        text = processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True
+        )
+        image_inputs, video_inputs = process_vision_info(messages)
+
+        inputs = processor(
+            text=[text],
+            images=image_inputs,
+            videos=video_inputs,
+            padding=True,
+            return_tensors="pt",
+        )
+
+        answer = generate_one_answer(model, processor, hf_tokenizer, inputs, args.osl)
+
+        results.append({
+            "question_id": qid,
+            "answer": answer,
+        })
+
+    with open(args.output_json, "w") as f:
+        json.dump(results, f)
+    print(f"Saved predictions to {args.output_json}")
+
+
+def build_finetune_arch(args,tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
     SIZE_INFO_MAP = {
         "2B": {"hf_model_name": "Qwen/Qwen2-VL-2B-Instruct", "llmconfig_class": llm.Qwen2Config1P5B},
         "7B": {"hf_model_name": "Qwen/Qwen2-VL-7B-Instruct", "llmconfig_class": llm.Qwen2Config7B},
     }
-    model_size = "2B"
+    model_size = args.model_size
     _, llm_config_class = (
         SIZE_INFO_MAP[model_size]["hf_model_name"],
         SIZE_INFO_MAP[model_size]["llmconfig_class"],
@@ -104,17 +220,32 @@ def main(args) -> None:
     # The default range for the number of visual tokens per image in the model is 4-16384. You can set min_pixels
     # and max_pixels according to your needs, such as a token count range of 256-1280, to balance speed and memory
     # usage.
+    SIZE_INFO_MAP = {
+        "2B": {"hf_model_name": "Qwen/Qwen2-VL-2B-Instruct", "llmconfig_class": llm.Qwen2Config1P5B},
+        "7B": {"hf_model_name": "Qwen/Qwen2-VL-7B-Instruct", "llmconfig_class": llm.Qwen2Config7B},
+    }
+    model_size = args.model_size
+    hf_model_name, _ = (
+        SIZE_INFO_MAP[model_size]["hf_model_name"],
+        SIZE_INFO_MAP[model_size]["llmconfig_class"],
+    )
+
     min_pixels = 16 * 28 * 28
     max_pixels = 64 * 28 * 28
     processor = AutoProcessor.from_pretrained(
-        "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels
+        # "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels
+        hf_model_name, 
+        min_pixels=min_pixels, 
+        max_pixels=max_pixels
+
     )
     hf_tokenizer = processor.tokenizer
 
     fabric = trainer.to_fabric()
     # Decide whether to import or load the model based on the input arguments
     if args.load_from_hf:
-        model = fabric.import_model("hf://Qwen/Qwen2-VL-2B-Instruct", Qwen2VLModel)
+        model = fabric.import_model("hf://" +hf_model_name,
+         Qwen2VLModel)
     else:
         # model = Qwen2VLModel(Qwen2VLConfig2B(), tokenizer=hf_tokenizer)
         model = build_finetune_arch(
@@ -126,6 +257,9 @@ def main(args) -> None:
         model = fabric.load_model(args.local_model_path, model)
     model = model.module.cuda()
     model.eval()
+    if args.json_path is not None and args.image_folder is not None:
+        run_textvqa_eval(args, processor, hf_tokenizer, model)
+        return
 
     messages = [
         {
@@ -135,7 +269,10 @@ def main(args) -> None:
                     "type": "image",
                     "image": args.image_url,
                 },
-                {"type": "text", "text": "Describe this image."},
+                {
+                    "type": "text", 
+                    "text": "Describe this image."
+                },
             ],
         }
     ]
@@ -203,11 +340,29 @@ if __name__ == "__main__":
         help="Local path to the model if not loading from Hugging Face.",
     )
     parser.add_argument(
-        "--image_url",
+        "--json_path",
         type=str,
-        default="https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/assets/demo.jpeg",
-        help="URL of the image to use for inference.",
+        default="/datasets/TextVQA/val/TextVQA_0.5.1_val.json",
+        help="path of the JSON file to use.",
     )
+    parser.add_argument(
+        "--image_folder",
+        type=str,
+        default="/datasets/TextVQA/val/train_images/",
+        help="path of the local image files.",
+    )
+    parser.add_argument(
+    "--output_json",
+    type=str,
+    default="pred_textvqa_val.json",
+    help="Where to save predictions (question_id, answer).",
+    )
+    parser.add_argument(
+    "--model_size",
+    type=str,
+    default="2B",
+    choices=["2B", "7B"],
+    help="Qwen2-VL model size")
     parser.add_argument('--osl', type=int, default=30, help='output seq length')
     parser.add_argument('--tp_size', type=int, default=1, help='tensor parallel size')
     parser.add_argument('--pp_size', type=int, default=1, help='pipeline parallel size')

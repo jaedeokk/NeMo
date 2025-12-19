@@ -32,6 +32,10 @@ from nemo.utils import logging
 from nemo.collections import llm, vlm
 from nemo.collections.vlm import MultimodalProjectorConfig, Qwen2VLVisionConfig, Qwen2VLConfig
 
+from nemo.collections.vlm.qwen2vl.data.multimodal_tokens import VIDEO_TOKEN_INDEX
+
+HF_VIDEO_PLACEHOLDER_ID = 151656  
+
 
 def build_finetune_arch(tokenizer, dct=False, max_sequence_length=4096, projector_type="mcore_mlp"):
     SIZE_INFO_MAP = {
@@ -104,8 +108,10 @@ def main(args) -> None:
     # The default range for the number of visual tokens per image in the model is 4-16384. You can set min_pixels
     # and max_pixels according to your needs, such as a token count range of 256-1280, to balance speed and memory
     # usage.
-    min_pixels = 16 * 28 * 28
-    max_pixels = 64 * 28 * 28
+    # min_pixels = 16 * 28 * 28
+    # max_pixels = 64 * 28 * 28
+    min_pixels = 64 * 28 * 28
+    max_pixels = 256 * 28 * 28
     processor = AutoProcessor.from_pretrained(
         "Qwen/Qwen2-VL-2B-Instruct", min_pixels=min_pixels, max_pixels=max_pixels
     )
@@ -132,10 +138,12 @@ def main(args) -> None:
             "role": "user",
             "content": [
                 {
-                    "type": "image",
-                    "image": args.image_url,
+                    "type": "video",
+                    "video": args.image_url,
+                    # "max_pixels": 360 * 420,
+                    # "fps": 1.0,
                 },
-                {"type": "text", "text": "Describe this image."},
+                {"type": "text", "text": "Describe the video"},
             ],
         }
     ]
@@ -154,27 +162,28 @@ def main(args) -> None:
 
     with torch.no_grad():
         input_ids = inputs['input_ids'].clone().to("cuda")
-        # convert special tokens to nemo image ID
-        input_ids[input_ids == 151655] = -200
-        image_grid_thw = inputs['image_grid_thw'].clone().to("cuda")
-        pixel_values = inputs['pixel_values'].clone().to("cuda")
-
-        # Greedy generation loop
+        input_ids[input_ids == HF_VIDEO_PLACEHOLDER_ID] = VIDEO_TOKEN_INDEX
+        video_grid_thw = inputs['video_grid_thw'].clone().to("cuda")
+        pixel_values_videos = inputs['pixel_values_videos'].clone().to("cuda")
+        attention_mask = inputs["attention_mask"].clone().to("cuda")  
         generated_ids = input_ids
+        generated_mask = attention_mask
         for _ in range(args.osl):
             output = model(
-                pixel_values=pixel_values,
-                input_ids=input_ids,
+                input_ids=generated_ids,
+                attention_mask=generated_mask,   
                 position_ids=None,
-                attention_mask=None,
-                image_grid_thw=image_grid_thw,
+                pixel_values_videos=pixel_values_videos,
+                video_grid_thw=video_grid_thw,
             )
-
             next_token_ids = torch.argmax(output[:, -1], dim=-1, keepdim=True)
             generated_ids = torch.cat([generated_ids, next_token_ids], dim=-1)
 
-            input_ids = generated_ids
-            # If the generated token is the end of sequence token, stop generating
+            generated_mask = torch.cat(
+                [generated_mask, torch.ones((generated_mask.size(0), 1), device=generated_mask.device, dtype=generated_mask.dtype)],
+                dim=1
+            )
+
             if next_token_ids.item() == hf_tokenizer.eos_token_id:
                 break
 
